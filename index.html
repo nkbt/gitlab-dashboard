@@ -24,41 +24,37 @@
 
 		<div class="panel-heading">
 			<div class="row" data-toggle="collapse" data-parent="#projects" data-target="#project-<%- project.id %>">
-				<div class="col-xs-2 text-right">
+				<div class="col-sm-2 col-xs-4 text-right">
 					<%- project.namespace.name %>
 				</div>
-				<div class="col-xs-2">
+				<div class="col-sm-2 col-xs-4">
 					<%- project.name %>
 				</div>
-				<div class="col-xs-6">
-					<b><%- project.path_with_namespace %></b>
-				</div>
-				<div class="col-xs-2 text-right">
+				<div class="col-sm-2 col-xs-4 text-right pull-right">
 					<b><%- project.latestTag && project.latestTag.name %></b>
+				</div>
+				<div class="col-sm-offset-0 col-sm-6 col-xs-offset-4 col-xs-8">
+					<b><%- project.path_with_namespace %></b>
 				</div>
 			</div>
 		</div>
 		<div id="project-<%- project.id %>" class="panel-collapse collapse">
 			<div class="panel-body">
 
-				<div class="panel panel-default">
-					<div class="panel-body">
-						<dl class="dl-horizontal">
-							<dt>ID</dt>
-							<dd><%- project.id %></dd>
-							<dt>URL</dt>
-							<dd><a href="<%- project.web_url %>"><%- project.web_url %></a></dd>
-							<dt>GIT</dt>
-							<dd><%- project.ssh_url_to_repo %></dd>
-						</dl>
-					</div>
-				</div>
+				<dl class="dl-horizontal">
+					<dt>ID</dt>
+					<dd><%- project.id %></dd>
+					<dt>URL</dt>
+					<dd><a href="<%- project.web_url %>"><%- project.web_url %></a></dd>
+					<dt>GIT</dt>
+					<dd><%- project.ssh_url_to_repo %></dd>
+				</dl>
 
-				<div class="panel panel-default">
-					<div class="panel-body">
-						<dl class="dl-horizontal" id="tags-<%- project.id %>"><%= project.tagsHtml %></dl>
-					</div>
-				</div>
+				<br/>
+				<br/>
+				<br/>
+
+				<dl class="dl-horizontal" id="tags-<%- project.id %>"><%= project.tagsHtml %></dl>
 
 			</div>
 		</div>
@@ -82,7 +78,7 @@
 
 
 		function setLatestTag(project) {
-			var isCore = project.namespace.path === 'core';
+			var isCore = project.namespace.path === 'core',
 					tagPrefix = isCore ? project.path + '-' : '';
 			project.latestTag = _.last(_.reject(project.tags, function (tag) {
 				return isCore ? tag.name.substr(0, tagPrefix.length) !== tagPrefix : !tag.name.match(/^[0-9\.]+$/);
