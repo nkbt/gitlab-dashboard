@@ -8,11 +8,11 @@
 		"async": "^0.9.0",
 		"javascript-natural-sort": "^0.7.1",
 		"request": "^2.36.0",
+		"ssh2": "^0.3.3",
 		"underscore": "^1.6.0"
 	},
 	"devDependencies": {},
-	"scripts": {
-	},
+	"scripts": {},
 	"repository": {
 		"type": "git",
 		"url": "git@github.com:nkbt/gitlab-dashboard.git"

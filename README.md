@@ -8,10 +8,23 @@ GitLab Dashboard. Shows all your projects with tags
 	cd gitlab-dashboard
 	npm install
 
+Dashboard requires `config.json` to be present:
+
+	{
+		"url": "http://gitlab",
+		"token": "secret",
+		"ssh": {
+			"host": "",
+			"port": 22,
+			"username": "",
+			"privateKey": "-----BEGIN RSA PRIVATE KEY-----\nLINE\nLINE\nETC\n-----END RSA PRIVATE KEY-----"
+		}
+	}
+
 ### Run:
 
 	node app
 
-Dashboard requires two parameters: `url` (Gitlab URL) and `token` (private Gitlab token):
+Access in your browser:
 
-	http://localhost:3003?url=http://gitlab&token=S3cr3tT0k3n
+	http://localhost:3003

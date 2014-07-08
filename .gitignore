@@ -28,3 +28,5 @@ node_modules
 .idea
 .vagrant
 atlassian-ide-plugin.xml
+
+config.json

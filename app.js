@@ -6,7 +6,9 @@ var naturalSort = require('javascript-natural-sort');
 var url = require('url');
 var fs = require('fs');
 var http = require('http');
+var Connection = require('ssh2');
 
+var config = require('./config.json');
 
 function sortProjects(projects) {
 	return projects.sort(function (projectA, projectB) {
@@ -34,8 +36,8 @@ function processResponse(response, body, callback) {
 
 
 function Gitlab(options) {
-	this.token = options.token;
 	this.url = options.url;
+	this.token = options.token;
 }
 
 
@@ -59,6 +61,55 @@ Gitlab.prototype.getProjectTags = function (project, callback) {
 	], callback);
 };
 
+function call(command, callback) {
+	var conn = new Connection();
+	return conn
+		.on('ready', function () {
+			conn.exec(command, function (err, stream) {
+				var data = [],
+					errorMessage;
+
+				if (err) {
+					return callback(err);
+				}
+
+				stream
+					.on('exit', function () {
+						if (errorMessage) {
+							return callback(new Error(errorMessage))
+						}
+						return callback(null, data.join('\n'));
+					})
+					.on('close', function () {
+						conn.end();
+					})
+					.on('data', function (response) {
+						data.push(response.toString().trim());
+					})
+					.stderr.on('data', function (response) {
+						errorMessage = response.toString().trim();
+					});
+			});
+		})
+		.connect(config.ssh);
+}
+
+
+function setVersions(env) {
+	return function (projects, callback) {
+		var commands = _.map(projects, function (project) {
+			return ['releaseGetVersion', project.path_with_namespace, env].join(' ');
+		});
+		return call(commands.join(';'), function(error, data) {
+			var versions = data.split('\n');
+			return callback(null, _.map(projects, function(project, index) {
+				project[env] = versions[index] ? versions[index] : '';
+				return project;
+			}));
+		})
+	};
+}
+
 
 Gitlab.prototype.getData = function (callback) {
 	var _this = this;
@@ -68,10 +119,25 @@ Gitlab.prototype.getData = function (callback) {
 		processResponse,
 		function (projects, next) {
 			return async.map(sortProjects(projects), _this.getProjectTags.bind(_this), next);
-		}
+		},
+		setVersions('dev'),
+		setVersions('live')
 	], callback);
 };
 
+
+function jsonResponse(res) {
+	return function (error, data) {
+		if (error) {
+			data = {
+				error: error.message,
+				stack: error.stack
+			};
+		}
+		res.writeHead(200, {'Content-Type': 'application/json'});
+		res.end(JSON.stringify(data, null, '\t'));
+	};
+}
 
 
 http.createServer(function (req, res) {
@@ -83,20 +149,12 @@ http.createServer(function (req, res) {
 		return fs.createReadStream('./index.html').pipe(res);
 	}
 
-	gitlab = new Gitlab(route.query);
+	gitlab = new Gitlab(config);
 
-	return gitlab.getData(function (error, data) {
-		if (error) {
-			data = {
-				error: error.message,
-				stack: error.stack
-			};
-		}
-		var json = JSON.stringify(data);
-		res.writeHead(200, {'Content-Type': 'application/json'});
-		res.end(JSON.stringify(data, null, '\t'));
+	if (route.pathname.substr(0, 5) === '/data') {
+		return gitlab.getData(jsonResponse(res));
+	}
 
-	});
-
+	return jsonResponse(res)(new Error('404'));
 }).listen(3003);
 

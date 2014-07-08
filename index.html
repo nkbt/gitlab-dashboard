@@ -31,6 +31,8 @@
 					<%- project.name %>
 				</div>
 				<div class="col-sm-2 col-xs-4 text-right pull-right">
+					<% project.live && print('<i>Live: ' + project.live + '</i>') %>
+					<% project.dev && print('<i>Dev: ' + project.dev + '</i>') %>
 					<b><%- project.latestTag && project.latestTag.name %></b>
 				</div>
 				<div class="col-sm-offset-0 col-sm-6 col-xs-offset-4 col-xs-8">
