@@ -61,7 +61,7 @@ Gitlab.prototype.getProjectTags = function (project, callback) {
 	], callback);
 };
 
-function call(command, callback) {
+function call(sshConfig, command, callback) {
 	var conn = new Connection();
 	return conn
 		.on('ready', function () {
@@ -91,18 +91,18 @@ function call(command, callback) {
 					});
 			});
 		})
-		.connect(config.ssh);
+		.connect(sshConfig);
 }
 
 
-function setVersions(env) {
-	return function (projects, callback) {
+function setVersions(projects, env, sshConfig) {
+	return function (callback) {
 		var commands = _.map(projects, function (project) {
 			return ['releaseGetVersion', project.path_with_namespace, env].join(' ');
 		});
-		return call(commands.join(';'), function(error, data) {
-			var versions = data.split('\n');
-			return callback(null, _.map(projects, function(project, index) {
+		return call(sshConfig, commands.join(';'), function (error, data) {
+			var versions = data && data.split('\n') || [];
+			return callback(null, _.map(projects, function (project, index) {
 				project[env] = versions[index] ? versions[index] : '';
 				return project;
 			}));
@@ -114,14 +114,21 @@ function setVersions(env) {
 Gitlab.prototype.getData = function (callback) {
 	var _this = this;
 
+
 	return async.waterfall([
 		async.apply(request.get, _this.gitlabUrl('/projects', {page: 1, per_page: 100})),
 		processResponse,
 		function (projects, next) {
 			return async.map(sortProjects(projects), _this.getProjectTags.bind(_this), next);
 		},
-		setVersions('dev'),
-		setVersions('live')
+		function (projects, next) {
+			var setAllVersions = _.map(config.deployment, function (sshConfig, env) {
+				return setVersions(projects, env, sshConfig);
+			});
+			return async.parallel(setAllVersions, function() {
+				return next(null, projects);
+			});
+		}
 	], callback);
 };
 

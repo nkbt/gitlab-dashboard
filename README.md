@@ -13,11 +13,25 @@ Dashboard requires `config.json` to be present:
 	{
 		"url": "http://gitlab",
 		"token": "secret",
-		"ssh": {
-			"host": "",
-			"port": 22,
-			"username": "",
-			"privateKey": "-----BEGIN RSA PRIVATE KEY-----\nLINE\nLINE\nETC\n-----END RSA PRIVATE KEY-----"
+		"deployment": {
+			"dev": {
+				"host": "",
+				"port": 22,
+				"username": "",
+				"privateKey": "-----BEGIN RSA PRIVATE KEY-----\nLINE\nLINE\nETC\n-----END RSA PRIVATE KEY-----"
+			},
+			"live": {
+				"host": "",
+				"port": 22,
+				"username": "",
+				"privateKey": "-----BEGIN RSA PRIVATE KEY-----\nLINE\nLINE\nETC\n-----END RSA PRIVATE KEY-----"
+			},
+			"production": {
+				"host": "",
+				"port": 22,
+				"username": "",
+				"privateKey": "-----BEGIN RSA PRIVATE KEY-----\nLINE\nLINE\nETC\n-----END RSA PRIVATE KEY-----"
+			}
 		}
 	}
 
