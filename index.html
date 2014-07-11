@@ -110,7 +110,7 @@
 				var tagParts = tagName.split('-'),
 						tagPrefix = _.first(tagParts),
 						number = _.last(tagParts);
-				if (project.path === tagPrefix || tagParts.length !== 2) {
+				if (project.namespace.path === 'core' && project.path === tagPrefix || tagParts.length !== 2) {
 					return null;
 				}
 				dependencies[tagPrefix] = tagName;
