@@ -5,6 +5,7 @@ var async = require('async');
 var naturalSort = require('javascript-natural-sort');
 var url = require('url');
 var fs = require('fs');
+var path = require('path');
 var http = require('http');
 var Connection = require('ssh2');
 
@@ -153,7 +154,7 @@ http.createServer(function (req, res) {
 
 	if (route.pathname === '/') {
 		res.writeHead(200, {'Content-Type': 'text/html'});
-		return fs.createReadStream('./index.html').pipe(res);
+		return fs.createReadStream(path.join(__dirname, 'index.html')).pipe(res);
 	}
 
 	gitlab = new Gitlab(config);
